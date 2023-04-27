@@ -3,15 +3,16 @@ import { Searchbar } from "./Searchbar/Searchbar";
 import { fetchApi } from "api/api";
 import { ImageGallery } from "./ImageGallery/ImageGallery";
 import { Button } from "./Button/Button";
+import { Loader } from "./Loader/Loader";
+import { Header } from "./Header/Header.styled";
 
 export class App extends Component {
   state = {
-    search: '',
     images: [],
+    search: '',
     page: 1,
-    total: 1,
     isLoading: false,
-    error: null,
+    noImage: false,
   };
 
   componentDidUpdate(_, prevState) {
@@ -23,15 +24,22 @@ export class App extends Component {
   };
 
   getImages = async (name, page) => {
+    this.setState({ isLoading: true });
+    
     try {
       const images = await fetchApi(name, page);
+      if (!images.length) {
+        this.setState({ noImage: true });
+      }
+
       this.setState(prevState => ({
-        images: [...prevState.images, ...images.hits],
-        page: prevState.page,
-        total: images.total,
+        images: [...prevState.images, ...images],
       }))
+
     } catch (error) {
       console.log(error.message)
+    } finally {
+      this.setState({ isLoading: false });
     };
   };
 
@@ -41,6 +49,8 @@ export class App extends Component {
         search: name,
         images: [],
         page: 1,
+        isLoading: false,
+        noImage: false,
       })
     };
   };
@@ -52,13 +62,16 @@ export class App extends Component {
   };
 
   render() {
-    const { images, total, page } = this.state;
+    const { images, page, isLoading, noImage } = this.state;
 
     return (
       <>
-      <header><Searchbar onSubmit={this.onSubmit} /></header>
-        <ImageGallery items={images} />
-        {(total / 12) > page && <Button loadMore={this.loadMore}/>}
+        <Header><Searchbar onSubmit={this.onSubmit} /></Header>
+        {noImage ?
+          <h2 style={{ marginTop: '48px', textAlign: 'center', color: 'red', fontSize: '48px' }}>NO IMAGES</h2>
+          : <ImageGallery items={images} />}
+        {isLoading && <Loader/>}
+        {(images.length / 12) >= page && !isLoading && <Button loadMore={this.loadMore}/>}
       </>
     )
   };

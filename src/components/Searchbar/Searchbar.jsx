@@ -1,4 +1,6 @@
-import { Field, Form, Formik } from "formik"
+import { Formik } from "formik"
+import { Button, Form, Icon, Input } from './Searchbar.styled';
+import PropTypes from 'prop-types';
 
 export const Searchbar = ({onSubmit}) => {
   return (
@@ -12,15 +14,19 @@ export const Searchbar = ({onSubmit}) => {
       }}
     >
       <Form>
-        <button type="submit">Search</button>
+        <Button type="submit"><Icon /></Button>
 
-        <Field
+        <Input
           name="name"
           autoComplete="off"
           autoFocus
-          placeholder="Search images and photos"
+          placeholder="Search images"
         />
       </Form>
   </Formik>
   )
+};
+
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
 };

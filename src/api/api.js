@@ -14,5 +14,5 @@ export const fetchApi = async (name, page) => {
   };
   
   const response = await axios(BASE_URL, { params });
-  return response.data
+  return response.data.hits
 };
