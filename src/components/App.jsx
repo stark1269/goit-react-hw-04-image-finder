@@ -33,8 +33,8 @@ export class App extends Component {
       }
 
       this.setState(prevState => ({
-        images: [...prevState.images, ...images],
-      }))
+        images: this.state.page === 1 ? images : [...prevState.images, ...images],
+      }));
 
     } catch (error) {
       console.log(error.message)
