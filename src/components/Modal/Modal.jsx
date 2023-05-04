@@ -1,39 +1,34 @@
-import { Component } from "react";
+import { useEffect } from "react";
 import { Backdrop, Modal } from "./Modal.styled"
 import { createPortal } from "react-dom";
 import PropTypes from 'prop-types';
 
 const modalRoot = document.querySelector('#modal-root');
 
-export class ImageModal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.handlerKeyDown);
-  };
-
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handlerKeyDown);
-  };
-
-  handlerKeyDown = e => {
-    const { onClose } = this.props
-    if (e.code === "Escape") {
-      onClose();
+export const ImageModal = ({ children, onClose }) => {
+  useEffect(() => {
+    function handlerKeyDown(e) {
+      if (e.code === "Escape") {
+        onClose();
+      };
     };
-  };
+    window.addEventListener('keydown', handlerKeyDown);
 
-  handlerBackdrop = e => {
-    const { onClose } = this.props
+    return () => {
+      window.removeEventListener('keydown', handlerKeyDown);
+    }
+  }, [onClose]);
+  
+  const handlerBackdrop = e => {
     if (e.currentTarget === e.target) {
       onClose();
     }
   };
 
-  render() {
-    return createPortal(
-      <Backdrop onClick={this.handlerBackdrop}>
-        <Modal>{this.props.children}</Modal>
-      </Backdrop>, modalRoot)
-  }
+  return createPortal(
+    <Backdrop onClick={handlerBackdrop}>
+      <Modal>{children}</Modal>
+    </Backdrop>, modalRoot)
 };
 
 ImageModal.propTypes = {

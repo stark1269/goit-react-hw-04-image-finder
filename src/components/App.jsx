@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useEffect, useState } from "react";
 import { Searchbar } from "./Searchbar/Searchbar";
 import { fetchApi } from "api/api";
 import { ImageGallery } from "./ImageGallery/ImageGallery";
@@ -6,73 +6,61 @@ import { Button } from "./Button/Button";
 import { Loader } from "./Loader/Loader";
 import { Header } from "./Header/Header.styled";
 
-export class App extends Component {
-  state = {
-    images: [],
-    search: '',
-    page: 1,
-    isLoading: false,
-    noImage: false,
-  };
+export const App = () => {
+  const [images, setImages] = useState([]);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [noImage, setNoImage] = useState(false);
 
-  componentDidUpdate(_, prevState) {
-    const { search, page } = this.state;
+  useEffect(() => {
+    if (!search) {
+      return
+    }
 
-    if (prevState.search !== search || prevState.page !== page) {
-      this.getImages(search, page);
-    };
-  };
+    getImages(search, page);
+  }, [search, page]);
 
-  getImages = async (name, page) => {
-    this.setState({ isLoading: true });
+async function getImages(name, page) {
+  setIsLoading(true);
     
     try {
       const images = await fetchApi(name, page);
       if (!images.length) {
-        this.setState({ noImage: true });
-      }
+        setNoImage(true);
+      };
 
-      this.setState(prevState => ({
-        images: this.state.page === 1 ? images : [...prevState.images, ...images],
-      }));
+      setImages(state => page === 1 ? images : [...state, ...images]);
 
     } catch (error) {
       console.log(error.message)
     } finally {
-      this.setState({ isLoading: false });
-    };
+      setIsLoading(false);
+  };
   };
 
-  onSubmit = ({name}) => {
+  const onSubmit = ({ name }) => {
     if (name.trim()) {
-      this.setState({
-        search: name,
-        images: [],
-        page: 1,
-        isLoading: false,
-        noImage: false,
-      })
+      setImages([]);
+      setSearch(name);
+      setPage(1);
+      setIsLoading(false);
+      setNoImage(false);
     };
   };
 
-  loadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const loadMore = () => {
+    setPage(state => state + 1)
   };
 
-  render() {
-    const { images, page, isLoading, noImage } = this.state;
-
-    return (
-      <>
-        <Header><Searchbar onSubmit={this.onSubmit} /></Header>
-        {noImage ?
-          <h2 style={{ marginTop: '48px', textAlign: 'center', color: 'red', fontSize: '48px' }}>NO IMAGES</h2>
-          : <ImageGallery items={images} />}
-        {isLoading && <Loader/>}
-        {(images.length / 12) >= page && !isLoading && <Button loadMore={this.loadMore}/>}
-      </>
-    )
-  };
+  return (
+    <>
+      <Header><Searchbar onSubmit={onSubmit} /></Header>
+      {noImage ?
+        <h2 style={{ marginTop: '48px', textAlign: 'center', color: 'red', fontSize: '48px' }}>NO IMAGES</h2>
+        : <ImageGallery items={images} />}
+      {isLoading && <Loader />}
+      {(images.length / 12) >= page && !isLoading && <Button loadMore={loadMore} />}
+    </>
+  )
 };

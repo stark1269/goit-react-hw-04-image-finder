@@ -2,46 +2,37 @@ import { ImageGalleryItem } from "components/ImageGalleryItem/ImageGalleryItem";
 import PropTypes from 'prop-types';
 import { List } from "./ImageGallery.styled";
 import { ImageModal } from "components/Modal/Modal";
-import { Component } from "react";
+import { useState } from "react";
 
-export class ImageGallery extends Component {
-  state = {
-    isModalOpen: false,
+export const ImageGallery = ({ items }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [imgSrc, setImgSrc] = useState('');
+  const [alt, setAlt] = useState('');
+
+  const showModal = (largeImg, tags) => {
+    setIsModalOpen(true);
+    setImgSrc(largeImg);
+    setAlt(tags);
   };
 
-  showModal = (largeImg ,tags) => {
-    this.setState({
-      isModalOpen: true,
-      largeImg,
-      tags,
-    })
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
-  closeModal = () => {
-    this.setState({
-      isModalOpen: false,
-    })
-  };
-
-  render() {
-    const { items } = this.props;
-    const { isModalOpen, largeImg, tags } = this.state;
-
-    return (
-      <List>
+  return (
+    <List>
       {items.map(item => {
         return (
-          <ImageGalleryItem key={item.id} item={item} showModal={this.showModal} />
+          <ImageGalleryItem key={item.id} item={item} showModal={showModal} />
         )
       })}
-        {isModalOpen && (
-          <ImageModal onClose={this.closeModal}>
-            <img src={largeImg} alt={tags} width='100%' height='100%'/>
-          </ImageModal>
-        )}
+      {isModalOpen && (
+        <ImageModal onClose={closeModal}>
+          <img src={imgSrc} alt={alt} width='100%' height='100%' />
+        </ImageModal>
+      )}
     </List>
-    )
-  };
+  )
 };
 
 ImageGallery.propTypes = {
