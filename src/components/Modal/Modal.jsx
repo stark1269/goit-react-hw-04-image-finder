@@ -33,4 +33,5 @@ export const ImageModal = ({ children, onClose }) => {
 
 ImageModal.propTypes = {
   onClose: PropTypes.func.isRequired,
+  children: PropTypes.element.isRequired,
 };
